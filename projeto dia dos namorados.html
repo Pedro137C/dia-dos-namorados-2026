@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Um Jardim Para Você 💖</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #2b2b36;
+            --shelf-color: #5c3a21;
+            --shelf-top: #8b5a2b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a24 0%, #2d2d3a 100%);
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        /* Caixa de Mensagem */
+        .dialog-box {
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #ff99cc;
+            border-radius: 12px;
+            padding: 25px 30px;
+            width: 85%;
+            max-width: 800px;
+            min-height: 140px;
+            margin-top: 20px;
+            margin-bottom: 50px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 15px rgba(255, 153, 204, 0.2);
+            line-height: 1.8;
+            font-size: 14px;
+            z-index: 10;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .dialog-box::after {
+            content: "♥";
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            animation: blink 1.2s infinite;
+            color: #ff3366;
+            font-size: 18px;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; transform: scale(1); }
+            50%, 100% { opacity: 0.3; transform: scale(0.9); }
+        }
+
+        /* Área do Jardim */
+        .garden-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 30px;
+            padding-bottom: 15px;
+            z-index: 5;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .shelf {
+            position: absolute;
+            bottom: 0;
+            width: 100vw;
+            height: 25px;
+            background: var(--shelf-color);
+            border-top: 6px solid var(--shelf-top);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        .plant-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        canvas {
+            image-rendering: pixelated; /* Mantém o estilo retro/Lego nítido */
+            display: block;
+            filter: drop-shadow(0 10px 5px rgba(0,0,0,0.4));
+            transition: all 0.3s ease;
+        }
+
+        .flower-head {
+            transform-origin: bottom center;
+            z-index: 3;
+        }
+
+        .pot {
+            transform-origin: bottom center;
+            margin-top: -5px; /* Junta a planta com o vaso */
+            z-index: 2;
+        }
+
+        /* Interações */
+        .plant-wrapper:hover {
+            transform: translateY(-10px);
+        }
+
+        .plant-wrapper:hover .flower-head canvas {
+            animation: sway 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+        }
+
+        @keyframes sway {
+            0% { transform: rotate(-4deg); }
+            100% { transform: rotate(4deg); }
+        }
+
+        .jump {
+            animation: jumpAnim 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        }
+
+        @keyframes jumpAnim {
+            0% { transform: translateY(0) scale(1); }
+            40% { transform: translateY(-40px) scale(1.05) rotate(3deg); }
+            100% { transform: translateY(0) scale(1) rotate(0deg); }
+        }
+
+        /* Efeitos Mágicos */
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            z-index: 100;
+            animation: floatUp 1s ease-out forwards;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .heart-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 24px;
+            z-index: 100;
+            animation: burst 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            text-shadow: 0 0 5px rgba(255,0,0,0.5);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-80px) scale(1.5) rotate(45deg); opacity: 0; }
+        }
+
+        @keyframes burst {
+            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(var(--rot)); opacity: 0; }
+        }
+
+        /* Responsividade para Celular */
+        @media (max-width: 800px) {
+            .garden-container {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            .shelf { display: none; }
+            .plant-wrapper {
+                margin-bottom: 20px;
+                border-bottom: 5px solid var(--shelf-top);
+                padding-bottom: 5px;
+            }
+            .dialog-box { font-size: 11px; line-height: 1.6; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dialog-box" id="text-container"></div>
+
+    <div class="garden-container" id="garden">
+        <div class="shelf"></div>
+    </div>
+
+    <script>
+        // --- 1. A MENSAGEM ---
+        const message = "Oi meu amor! 💖\n\nEu sei o quanto você gosta de flores e, como eu não posso te dar todas as flores do mundo agora, resolvi construir esse jardim virtual inteirinho pra você.\n\nColoquei cada pecinha aqui pensando em você. Você é a pessoa mais especial da minha vida, e eu queria te dar algo único pra te fazer sorrir hoje.\n\nPassa o mouse nas flores e clica nelas pra ver a mágica!\n\nTe amo infinitamente.";
+        
+        let i = 0;
+        const textContainer = document.getElementById("text-container");
+        
+        function typeWriter() {
+            if (i < message.length) {
+                if (message.charAt(i) === '\n') {
+                    textContainer.innerHTML += "<br>";
+                } else {
+                    textContainer.innerHTML += message.charAt(i);
+                }
+                i++;
+                let speed = Math.random() * 20 + 30; 
+                setTimeout(typeWriter, speed);
+            }
+        }
+        setTimeout(typeWriter, 800);
+
+        // --- 2. PALETA DE CORES (Detalhada) ---
+        const C = {
+            '_': 'transparent',
+            'W': '#FFFFFF', // Branco puro
+            '1': '#E0E0E0', // Branco sombra
+            'P': '#FFB3C6', // Rosa claro
+            '2': '#FF8FAB', // Rosa escuro
+            'R': '#D90429', // Vermelho vivo
+            'Y': '#FFD60A', // Amarelo
+            'O': '#F77F00', // Laranja
+            '4': '#D62828', // Laranja escuro/Vermelho
+            'G': '#70E000', // Verde claro (Folhas)
+            'D': '#008000', // Verde médio
+            '5': '#004B23', // Verde escuro (Caule)
+            'B': '#603808', // Marrom
+            '6': '#3E2723', // Marrom escuro
+            'T': '#F5E6CC', // Bege (Vaso)
+            '7': '#D4C4A8', // Bege sombra
+            'L': '#A2D2FF', // Azul claro (Vaso)
+            '8': '#89C2D9', // Azul sombra
+            'M': '#95D5B2', // Verde menta (Vaso)
+            '9': '#74C69D', // Verde menta sombra
+            'K': '#E9C46A', // Dourado
+            '0': '#F4A261', // Dourado escuro
+            'Z': '#2A1A12', // Madeira base
+            'X': '#1A0F0A'  // Sombra base
+        };
+
+        // --- 3. ARTE EM PIXEL (Matrizes de alta resolução 35x35) ---
+
+        // Orquídea
+        const orchidHead = [
+            "___________________________________",
+            "_____________W_W___________________",
+            "___________WWWWW11_________________",
+            "__________WWWWWWW11_____WWW________",
+            "____W_____WWWWWWW11___WWWWWW1______",
+            "___WWW____WWWWWWW11__WWWWWWWW1_____",
+            "__WWWW1____WWWWW11___WWWWWWWW1_____",
+            "__WWWW1__WW_1PP1_W___WWWWWWWW1_____",
+            "___WW1__WWWWPPPPWW1__WWWWWWW1______",
+            "____1___WWWW2YY2WW1___WWWWW1_______",
+            "_________WW_PPPP_W1____WWW1________",
+            "__________W11PP11W1_____W1_________",
+            "___________W11111W_________________",
+            "____________11111_________WWW______",
+            "______________5_________WWWWWW1____",
+            "______WW______5_______WWWWWWWWW1___",
+            "_____WWWW1____5______WWWWWWWWWW1___",
+            "____WWWWWW1___5______WWWWWWWWWW1___",
+            "___WWWWWWWW1_1PP1_W___WWWWWWWWW1___",
+            "___WWWWWWWW1WWPPPPWW1__WWWWWWW1____",
+            "____WWWWWWW1WW2YY2WW1___WWWWW1_____",
+            "_____WWWWW1_WW_PPPP_W1____W1_______",
+            "______WWW1___W11PP11W1_____________",
+            "_______W1_____W11111W______________",
+            "_______________11111_______________",
+            "_________________5_________________",
+            "_________________5_________________",
+            "___DDDD__________5_________________",
+            "__DD55DD_________5________DDDD_____",
+            "__DD555DD________5_______DD55DD____",
+            "_DD55555DD_______5______DD5555DD___",
+            "_DD555555DD______5_____DD555555DD__",
+            "DD55555555DD_____5____DD55555555DD_",
+            "DD555555555DD____5___DD555555555DD_",
+            "DD5555555555DD___5__DD5555555555DD_"
+        ];
+        const orchidPot = [
+            "______555555______",
+            "_____77777777_____",
+            "____TTTTTTTTTT____",
+            "____TTT7777TTT____",
+            "____TTTTTTTTTT____",
+            "____KKKKKKKKKK____",
+            "____0000000000____",
+            "____TTTTTTTTTT____",
+            "_____TTTTTTTT_____",
+            "______ZZZZZZ______",
+            "_____ZZ_ZZ_ZZ_____",
+            "____XX__XX__XX____"
+        ];
+
+        // Bambu da Sorte
+        const bambooHead = [
+            "_______________G___________________",
+            "______________GGG__________________",
+            "_______G______G5G__________G_______",
+            "______GGG_____G5G_________GGG______",
+            "_______G______G5G__________G_______",
+            "________G_____G5G_____G___G________",
+            "_________G____G5G____GGG_G_________",
+            "__________G___555_____G_G__________",
+            "___G______G___G5G_______G__________",
+            "__GGG___G_G___G5G_______G___G______",
+            "___G___GGG____G5G_______G__GGG_____",
+            "____G___G_____G5G_______G___G______",
+            "_____G__G_____G5G_______G__G_______",
+            "______G_G_____555_______G_G________",
+            "________G_____G5G_______G_G________",
+            "________G_____G5G_______G_G________",
+            "________G_____G5G_______555________",
+            "________G_____G5G_______G5G________",
+            "________555___G5G___G___G5G________",
+            "________G5G___G5G__GGG__G5G________",
+            "___G____G5G___G5G___G___G5G________",
+            "__GGG___G5G___G5G___G___G5G___G____",
+            "___G____G5G___555___G___555__GGG___",
+            "____G___G5G___G5G___G___G5G___G____",
+            "_____G__G5G___G5G___G___G5G__G_____",
+            "______G_G5G___G5G___G___G5G_G______",
+            "________555___G5G___555_G5G_G______",
+            "________G5G___G5G___G5G_555________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________",
+            "________G5G___G5G___G5G_G5G________"
+        ];
+        const bambooPot = [
+            "_____55555555_____",
+            "_____00000000_____",
+            "____KKKKKKKKKK____",
+            "___KKKKKKKKKKKK___",
+            "___KKK000000KKK___",
+            "___KKKKKKKKKKKK___",
+            "____KKKKKKKKKK____",
+            "_____KKKKKKKK_____",
+            "______ZZZZZZ______",
+            "_____ZZ_ZZ_ZZ_____",
+            "____XX__XX__XX____",
+            "__________________"
+        ];
+
+        // Crisântemo
+        const chrysHead = [
+            "___________________________________",
+            "________________4__________________",
+            "______________44O44________________",
+            "_____________44OOO44_______________",
+            "___________44OOOOOOO44_____________",
+            "__________44OOOYYYOOO44____________",
+            "_________44OOYYYYYYYOO44___________",
+            "________44OOYYYOOOYYYOO44__________",
+            "________44OOYYOOOOOYYOO44__________",
+            "________44OOYYOOOOOYYOO44__________",
+            "________44OOYYYOOOYYYOO44__________",
+            "_________44OOYYYYYYYOO44_____44____",
+            "__________44OOOYYYOOO44____44OO44__",
+            "___________44OOOOOOO44____44OYYO44_",
+            "_____________44OOO44______44OYYO44_",
+            "______________44O44________44OO44__",
+            "________________5___________4444___",
+            "________________5____________44____",
+            "________________5____________5_____",
+            "_____44_________5____________5_____",
+            "___44OO44_______5____________5_____",
+            "__44OYYO44______5____________5_____",
+            "__44OYYO44______5_____G______5_____",
+            "___44OO44_______5____GGG____5______",
+            "____4444________5___GGDGG__5_______",
+            "_____44_________5____D5D__5________",
+            "______5_________5_____5__5_________",
+            "_______5________5_____5_5__________",
+            "________5___G___5_____55___________",
+            "_________5_GGG__5_____5____________",
+            "__________5GGDGG5_____5____________",
+            "___________5D5D5______5____________",
+            "____________555_______5____________",
+            "_____________5________5____________",
+            "_____________5________5____________"
+        ];
+        const chrysPot = [
+            "______555555______",
+            "_____99999999_____",
+            "____MMMMMMMMMM____",
+            "____MMMMMMMMMM____",
+            "___MMMMMMMMMMMM___",
+            "___MMM999999MMM___",
+            "___MMMMMMMMMMMM___",
+            "____MMMMMMMMMM____",
+            "_____MMMMMMMM_____",
+            "______ZZZZZZ______",
+            "_____ZZ_ZZ_ZZ_____",
+            "____XX__XX__XX____"
+        ];
+
+        // Ameixeira
+        const plumHead = [
+            "__________________________RR_______",
+            "________________________RRRPRR_____",
+            "_________________________RRYRR_____",
+            "__________________________RR_______",
+            "________________________66_________",
+            "_______________________66__________",
+            "_______________RR_____66_____RR____",
+            "_____________RRRPRR__66____RRRPRR__",
+            "______________RRYRR_66______RRYRR__",
+            "_______________RR__66________RR____",
+            "__________________66_______________",
+            "_________________66________________",
+            "___________RR___66_______RR________",
+            "_________RRRPRR66______RRRPRR______",
+            "__________RRYRR66_______RRYRR______",
+            "___________RR_66_________RR________",
+            "_____________66____________________",
+            "____________66_____________________",
+            "_______RR__66_________RR___________",
+            "_____RRRPRR66_______RRRPRR_________",
+            "______RRYRR66________RRYRR_________",
+            "_______RR_66__________RR___________",
+            "_________66________________________",
+            "________66_________________________",
+            "_______66__________________________",
+            "______66___________________________",
+            "_____66____________________________",
+            "____66_____________________________",
+            "___66______________________________",
+            "__66_______________________________",
+            "_66________________________________",
+            "66_________________________________",
+            "66_________________________________",
+            "66_________________________________",
+            "66_________________________________"
+        ];
+        const plumPot = [
+            "______666666______",
+            "_____88888888_____",
+            "____LLLLLLLLLL____",
+            "____LLLLLLLLLL____",
+            "____LL888888LL____",
+            "____LLLLLLLLLL____",
+            "____KKKKKKKKKK____",
+            "____LLLLLLLLLL____",
+            "_____LLLLLLLL_____",
+            "______ZZZZZZ______",
+            "_____ZZ_ZZ_ZZ_____",
+            "____XX__XX__XX____"
+        ];
+
+        const plantsData = [
+            { id: 'orchid', head: orchidHead, pot: orchidPot, color: '#FFB3C6' },
+            { id: 'bamboo', head: bambooHead, pot: bambooPot, color: '#70E000' },
+            { id: 'chrysanthemum', head: chrysHead, pot: chrysPot, color: '#F77F00' },
+            { id: 'plum', head: plumHead, pot: plumPot, color: '#D90429' }
+        ];
+
+        // --- 4. MOTOR DE DESENHO (Canvas) ---
+        // Aqui garantimos que 100% dos pixels vão aparecer sem bugs de CSS
+        function createPixelCanvas(matrix, scale) {
+            const canvas = document.createElement('canvas');
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            
+            // O tamanho real do canvas em pixels
+            canvas.width = cols;
+            canvas.height = rows;
+            
+            // O tamanho que ele vai ocupar na tela (ampliado e nítido)
+            canvas.style.width = (cols * scale) + 'px';
+            canvas.style.height = (rows * scale) + 'px';
+            
+            const ctx = canvas.getContext('2d');
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const char = matrix[y][x];
+                    if (char !== '_' && C[char]) {
+                        ctx.fillStyle = C[char];
+                        ctx.fillRect(x, y, 1, 1);
+                    }
+                }
+            }
+            return canvas;
+        }
+
+        const garden = document.getElementById('garden');
+        
+        // Define o tamanho do "bloco de lego" na tela
+        const pixelScale = window.innerWidth < 800 ? 3.5 : 5;
+
+        // Renderiza cada planta
+        plantsData.forEach(plant => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'plant-wrapper';
+            wrapper.dataset.color = plant.color;
+
+            // Planta (Parte de cima)
+            const headDiv = document.createElement('div');
+            headDiv.className = 'flower-head';
+            headDiv.appendChild(createPixelCanvas(plant.head, pixelScale));
+
+            // Vaso (Parte de baixo)
+            const potDiv = document.createElement('div');
+            potDiv.className = 'pot';
+            potDiv.appendChild(createPixelCanvas(plant.pot, pixelScale));
+
+            wrapper.appendChild(headDiv);
+            wrapper.appendChild(potDiv);
+            
+            // Eventos interativos
+            addInteractions(wrapper);
+
+            // Insere antes da prateleira (para ficar por cima dela)
+            garden.insertBefore(wrapper, garden.lastElementChild);
+        });
+
+        // --- 5. INTERAÇÕES E MAGIAS ---
+        function addInteractions(element) {
+            // Efeito ao passar o mouse
+            element.addEventListener('mousemove', (e) => {
+                if (Math.random() > 0.85) { 
+                    createSparkle(e.clientX, e.clientY, element.dataset.color);
+                }
+            });
+
+            // Efeito ao clicar
+            element.addEventListener('click', (e) => {
+                // Reinicia a animação de pulo
+                element.classList.remove('jump');
+                void element.offsetWidth; // Força atualização
+                element.classList.add('jump');
+
+                // Explosão de corações apaixonados
+                const rect = element.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 3;
+
+                for(let j = 0; j < 10; j++) {
+                    createHeart(centerX, centerY);
+                }
+            });
+        }
+
+        function createSparkle(x, y, color) {
+            const p = document.createElement('div');
+            p.className = 'sparkle';
+            p.style.left = (x - 10 + Math.random() * 20) + 'px';
+            p.style.top = (y - 10 + Math.random() * 20) + 'px';
+            p.style.backgroundColor = color;
+            p.style.color = color; // Para o box-shadow
+            document.body.appendChild(p);
+
+            setTimeout(() => p.remove(), 1000);
+        }
+
+        function createHeart(x, y) {
+            const h = document.createElement('div');
+            h.className = 'heart-particle';
+            // Corações variados
+            const coracoes = ['❤️', '💖', '✨', '🌸'];
+            h.innerHTML = coracoes[Math.floor(Math.random() * coracoes.length)];
+            
+            h.style.left = x + 'px';
+            h.style.top = y + 'px';
+            
+            // Física da explosão
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 60 + Math.random() * 80;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance - 50; // Tende a subir
+            const rot = (Math.random() - 0.5) * 180;
+
+            h.style.setProperty('--tx', `${tx}px`);
+            h.style.setProperty('--ty', `${ty}px`);
+            h.style.setProperty('--rot', `${rot}deg`);
+
+            document.body.appendChild(h);
+
+            setTimeout(() => h.remove(), 1000);
+        }
+    </script>
+</body>
+</html>
